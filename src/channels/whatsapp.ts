@@ -53,6 +53,11 @@ export async function startWhatsAppChannel(): Promise<void> {
 
       const userId = jid.replace(/@s\.whatsapp\.net$/, "");
 
+      const allowedNumbers = process.env.ALLOWED_NUMBERS;
+      if (allowedNumbers && !allowedNumbers.split(',').includes(userId)) {
+        console.log(`[whatsapp] Bloqueando mensagem de número não autorizado: ${userId}`);
+        continue;
+      }
       try {
         const reply = await handleIncomingMessage(userId, "whatsapp", text);
         await sock.sendMessage(jid, { text: reply });
