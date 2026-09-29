@@ -10,6 +10,17 @@ import { handleIncomingMessage } from "../core/conversation.js";
 
 const authDir = process.env.WHATSAPP_AUTH_DIR ?? "./auth_info";
 
+const allowedNumbersEnv = process.env.ALLOWED_NUMBERS;
+const allowedNumbers = allowedNumbersEnv
+  ? allowedNumbersEnv.split(",").map((n) => n.trim()).filter(Boolean)
+  : null;
+
+if (!allowedNumbers) {
+  console.warn(
+    "[whatsapp] ALLOWED_NUMBERS não configurada — o bot responderá a qualquer número que enviar mensagem.",
+  );
+}
+
 export async function startWhatsAppChannel(): Promise<void> {
   const { state, saveCreds } = await useMultiFileAuthState(authDir);
 
@@ -53,8 +64,7 @@ export async function startWhatsAppChannel(): Promise<void> {
 
       const userId = jid.replace(/@s\.whatsapp\.net$/, "");
 
-      const allowedNumbers = process.env.ALLOWED_NUMBERS;
-      if (allowedNumbers && !allowedNumbers.split(',').includes(userId)) {
+      if (allowedNumbers && !allowedNumbers.includes(userId)) {
         console.log(`[whatsapp] Bloqueando mensagem de número não autorizado: ${userId}`);
         continue;
       }
