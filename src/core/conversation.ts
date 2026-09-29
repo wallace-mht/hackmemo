@@ -21,8 +21,10 @@ export async function handleIncomingMessage(
 
   logTurn(userId, channel, message, reply);
 
-  // Don't block the reply on memory extraction — store the fact asynchronously.
-  rememberTurn(userId, `User said: "${message}". Assistant replied: "${reply}".`).catch((err) => {
+  // Don't block the reply on memory extraction. Store only what the user
+  // actually said — not the bot's reply — so a wrong or hallucinated answer
+  // from the LLM never becomes a permanent "fact" in Walrus Memory.
+  rememberTurn(userId, message).catch((err) => {
     console.error(`[memory] failed to store turn for user ${userId}:`, err);
   });
 
